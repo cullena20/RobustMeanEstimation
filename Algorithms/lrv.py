@@ -9,7 +9,6 @@ Code is based on MatLab code from https://github.com/kevinalai/AgnosticMeanAndCo
 
 import numpy as np
 from scipy.stats import norm
-import math
 
 def lrv(data, C=1, trace_est_option="robust"):
   """

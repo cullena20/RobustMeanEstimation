@@ -7,12 +7,12 @@ As a result, some runs may encounter bugs
 """
 
 # import corruption schemes, experiments, and estimators 
-from setup import identity_corruption_schemes, spherical_corruption_schemes, spherical_vary_std_schemes, meta_nonsp_corruption_schemes, nonsp_vary_std_schemes, uncorrupted_data_scheme, mix_schemes, id_gaussian_corruption_one_cluster
-from setup import experiments, std_experiments, tau_experiments, uncorrupted_experiments, ev_que_experiment
-from setup import main_estimators, lee_valiant_comparison, median_of_means_options, lrv_options_C, lrv_options_general_gaus, ev_options, large_outlier_identity_corruption_schemes, grad_iterations, ev_que_original_vs_new, que_estimators, ev_pruning_comparison, eigenvalue_pruning_routines
+from synthetic_setup import identity_corruption_schemes, spherical_corruption_schemes, spherical_vary_std_schemes, meta_nonsp_corruption_schemes, nonsp_vary_std_schemes, uncorrupted_data_scheme, mix_schemes, id_gaussian_corruption_one_cluster
+from synthetic_setup import experiments, std_experiments, tau_experiments, uncorrupted_experiments, ev_que_experiment
+from synthetic_setup import main_estimators, lee_valiant_comparison, median_of_means_options, lrv_options_C, lrv_options_general_gaus, ev_options, large_outlier_identity_corruption_schemes, grad_iterations, ev_que_original_vs_new, que_estimators, ev_pruning_comparison, eigenvalue_pruning_routines
 
 # use experiment_suite to run experiments
-from helper import experiment_suite
+from experiment_helper import experiment_suite
 
 # 4.1 - Uncorrupted Identity Covariance
 

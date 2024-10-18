@@ -104,35 +104,35 @@ uncorrupted_data_scheme = lambda n, d, eps: gaussian_data(n, d, eps, mean_fun=me
 # cov_fun is identity by default in generate_data_helper
 
 # corruption from dkk paper, hard for naive methods
-id_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=dkk_noise, mean_fun=mean_fun)
+id_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=dkk_noise, mean_fun=mean_fun)
 
 # cluster corruption sqrt(d) away from true mean, hard for naive methods
-id_gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+id_gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
 
 # two clusters of corruption sqrt(d) away from true mean, 45 degrees between each other, 70% one cluster 30% the other, hard for naive methods
-id_gaussian_corruption_two_clusters = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=gaussian_noise_two_clusters, mean_fun=mean_fun)
+id_gaussian_corruption_two_clusters = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=gaussian_noise_two_clusters, mean_fun=mean_fun)
 
 # uniform corruption from true_mean to true_mean + 1 in every coordinate, hard for naive methods
-id_uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=uniform_noise_top, mean_fun=mean_fun)
+id_uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=uniform_noise_top, mean_fun=mean_fun)
 
 # uniformly place corruption within sqrt(d) from true mean, not hard for naive methods
-id_uniform_corruption_whole = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=uniform_noise_whole, mean_fun=mean_fun)
+id_uniform_corruption_whole = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=uniform_noise_whole, mean_fun=mean_fun)
 
 # place two clusters of corruption 10sqrt(d) away from true mean and 20sqrt(d) away from true mean, easy for naive methods - show good methods in hard cases work in easy ones too
-id_obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=obvious_noise, mean_fun=mean_fun)
+id_obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=obvious_noise, mean_fun=mean_fun)
 
 # place two clusters - one sqrt(d) from the true mean, one 10 * sqrt(d) away from the true mean
-id_obvious_hard_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=obvious_hard_two_clusters, mean_fun=mean_fun)
+id_obvious_hard_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=obvious_hard_two_clusters, mean_fun=mean_fun)
 
 # subtract epsilon largest points from the projection in a certain direction - nothing performs much worse than sample mean here
-id_subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=subtractive_noise, mean_fun=mean_fun, additive=False)
+id_subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=subtractive_noise, mean_fun=mean_fun, additive=False)
 
 # One Easy Cluster One Hard Cluster
-id_obvious_easy_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=obvious_easy, mean_fun=mean_fun)
+id_obvious_easy_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=obvious_easy, mean_fun=mean_fun)
 
 # Large and Subtle Outlier Mixes
-id_obvious_gaus_one_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, gaussian_noise_one_cluster), mean_fun=mean_fun)
-id_obvious_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, dkk_noise), mean_fun=mean_fun)
+id_obvious_gaus_one_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, gaussian_noise_one_cluster), mean_fun=mean_fun)
+id_obvious_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, dkk_noise), mean_fun=mean_fun)
 
 identity_corruption_schemes = {  "dkk": id_dkk_corruption,
                         "gaus_one": id_gaussian_corruption_one_cluster,
@@ -149,8 +149,8 @@ large_outlier_identity_corruption_schemes = {
 }
 
 # Dependence On True Mean - Identity Covariance
-gaus_one_random = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=gaussian_noise_one_cluster, mean_fun= lambda d: np.random.randn(d) * 50)
-dkk_random = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=dkk_noise, mean_fun= lambda d: np.random.randn(d) * 50)
+gaus_one_random = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=gaussian_noise_one_cluster, mean_fun= lambda d: np.random.randn(d) * 50)
+dkk_random = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=dkk_noise, mean_fun= lambda d: np.random.randn(d) * 50)
 
 identity_true_mean_dependence_schemes = {
     "gaus_one_random": gaus_one_random,
@@ -164,15 +164,15 @@ std = math.sqrt(var)
 cov_fun = lambda d: np.eye(d) * var
 
 # same as identity schemes but scale all noise locations appropriately
-sp_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun= lambda n, d, true_mean: dkk_noise(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
-sp_gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_one_cluster(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
-sp_gaussian_corruption_two_clusters = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_two_clusters(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
-sp_uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: uniform_noise_top(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
-sp_obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
-sp_subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=subtractive_noise, mean_fun=mean_fun, cov_fun = cov_fun, additive=False)
+sp_dkk_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: dkk_noise(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_one_cluster(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_gaussian_corruption_two_clusters = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_two_clusters(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: uniform_noise_top(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=subtractive_noise, mean_fun=mean_fun, cov_fun = cov_fun, additive=False)
 
 # this isn't used and isn't so interesting
-sp_uniform_corruption_whole = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: uniform_noise_whole(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
+sp_uniform_corruption_whole = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: uniform_noise_whole(n, d, true_mean, std=std), mean_fun=mean_fun, cov_fun = cov_fun)
 
 spherical_corruption_schemes = {
     "dkk": sp_dkk_corruption,
@@ -184,13 +184,13 @@ spherical_corruption_schemes = {
 }
 
 # experiment with adjusting standard deviation - var parameter is not used here
-std_dkk_corruption = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun= lambda n, d, true_mean: dkk_noise(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
-std_gaussian_corruption_one_cluster =lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_one_cluster(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
-std_gaussian_corruption_two_clusters = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_two_clusters(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
-std_uniform_corruption_top = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: uniform_noise_top(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
-std_obvious_corruption = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun =lambda d: np.eye(d)*data_std**2)
+std_dkk_corruption = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: dkk_noise(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
+std_gaussian_corruption_one_cluster =lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_one_cluster(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
+std_gaussian_corruption_two_clusters = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_two_clusters(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
+std_uniform_corruption_top = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: uniform_noise_top(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun = lambda d: np.eye(d)*data_std**2)
+std_obvious_corruption = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=data_std), mean_fun=mean_fun, cov_fun =lambda d: np.eye(d)*data_std**2)
 
-std_gaus_one_small = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=data_std/5), mean_fun=mean_fun, cov_fun =lambda d: np.eye(d)*data_std**2)
+std_gaus_one_small = lambda n, d, eps, data_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: obvious_noise(n, d, true_mean, std=data_std/5), mean_fun=mean_fun, cov_fun =lambda d: np.eye(d)*data_std**2)
 
 spherical_vary_std_schemes = {
     "dkk": std_dkk_corruption,
@@ -218,10 +218,10 @@ meta_nonsp_corruption_schemes = {}
 # this loop isn't utilized for our main experiments, but more diagonal functions can be examined using it
 for diag_fun in diag_funs:
     cov_fun = lambda d: np.diag(diag_fun(d))
-    gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_one_cluster_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
-    uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: uniform_noise_top_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
-    obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: obvious_noise_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
-    subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda data, eps, true_mean: subtractive_noise_nonspherical(data, eps, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun, additive=False)
+    gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_one_cluster_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
+    uniform_corruption_top = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: uniform_noise_top_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
+    obvious_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: obvious_noise_nonspherical(n, d, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun)
+    subtractive_corruption = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda data, eps, true_mean: subtractive_noise_nonspherical(data, eps, true_mean, diag_fun), mean_fun=mean_fun, cov_fun = cov_fun, additive=False)
 
     corruption_schemes = {
         "gaus_one": gaussian_corruption_one_cluster,
@@ -233,8 +233,8 @@ for diag_fun in diag_funs:
     meta_nonsp_corruption_schemes[diag_fun.__name__] = corruption_schemes
 
 # varying standard deviation experiments
-nonsp_std_gaussian_corruption_one_cluster = lambda n, d, eps, max_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: gaussian_noise_one_cluster_nonspherical(n, d, true_mean, lambda d: dim_diag(d, max_var=max_std**2)), mean_fun=mean_fun, cov_fun = lambda d: np.diag(dim_diag(d, max_var=max_std**2)))
-nonsp_std_uniform_corruption_top = lambda n, d, eps, max_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=lambda n, d, true_mean: uniform_noise_top_nonspherical(n, d, true_mean,  lambda d: dim_diag(d, max_var=max_std**2)), mean_fun=mean_fun, cov_fun = lambda d: np.diag(dim_diag(d, max_var=max_std**2)))
+nonsp_std_gaussian_corruption_one_cluster = lambda n, d, eps, max_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: gaussian_noise_one_cluster_nonspherical(n, d, true_mean, lambda d: dim_diag(d, max_var=max_std**2)), mean_fun=mean_fun, cov_fun = lambda d: np.diag(dim_diag(d, max_var=max_std**2)))
+nonsp_std_uniform_corruption_top = lambda n, d, eps, max_std: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, corruption_fun=lambda n, d, true_mean: uniform_noise_top_nonspherical(n, d, true_mean,  lambda d: dim_diag(d, max_var=max_std**2)), mean_fun=mean_fun, cov_fun = lambda d: np.diag(dim_diag(d, max_var=max_std**2)))
     
 nonsp_vary_std_schemes = {
     "gaus_one": nonsp_std_gaussian_corruption_one_cluster,
@@ -357,6 +357,8 @@ ev_que_original_vs_new = {
     "que": lambda data, tau: que_mean(data, tau, t=10, original_threshold=True, fast=True),
     "que_low_n": lambda data, tau: que_mean(data, tau, t=10, fast=True)
 }
+
+# EM
 
 # Miscellaneous below
 # selecting t approrpriately matters (to get high probability success)

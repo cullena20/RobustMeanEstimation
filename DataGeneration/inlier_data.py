@@ -20,15 +20,16 @@ def gaussian_data(n, d, mean_fun=None, cov_fun=None):
     Defaulte to mean of all ones and identity covariance if no mean_fun or cov_fun are supplied
     """
     if mean_fun is None:
-        mean = np.ones(d)
+        true_mean = np.ones(d)
     else:
-        mean = mean_fun(d)
+        true_mean = mean_fun(d)
     if cov_fun is None:
         cov = np.eye(d)
     else:
         cov = cov_fun(d)
 
-    data = np.random.multivariate_normal(mean, cov, n)
+    data = np.random.multivariate_normal(true_mean, cov, n)
     good_sample_mean = np.mean(data, axis=0)
 
-    return data, good_sample_mean, mean    
+    return data, good_sample_mean, true_mean    
+

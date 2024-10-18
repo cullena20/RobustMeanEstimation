@@ -15,7 +15,6 @@ Code is based on MatLab code from https://github.com/hoonose/robust-filter
 
 import numpy as np
 import math
-from lrv import trace_est, var_est
 
 
 def eigenvalue_pruning(data, tau, gamma=5, t=10, threshold="lown", pruning="gaussian", counter=0, debug=False, early_halt=False, min_n = -float("inf")): # include early_halt in here again

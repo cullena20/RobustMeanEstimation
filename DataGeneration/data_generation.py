@@ -1,9 +1,11 @@
+'''
+Generate corrupted data schemes
+'''
+
 import numpy as np
 from helper import random_rotation_matrix
 
-# NOTE - I GOT RID OF ADDITIVE NOISE
-
-def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=True, mean_fun=None, cov_fun=None, rotate=False):
+def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=True, mean_fun=None, cov_fun=None, rotate=False, draw_from_data=False, **kwargs):
     """
     Generate corrupted data given supplied inlier data function and corruption function.
     
@@ -44,8 +46,13 @@ def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=Tr
 
     uncorrupted_data, good_sample_mean, true_mean = uncorrupted_fun(good_data_size, d, mean_fun=mean_fun, cov_fun=cov_fun)
 
+    print("UNCORRUPTED")
+    print(uncorrupted_data.shape)
+
     if additive:
-        noise = corruption_fun(round(n * eps), d, true_mean)
+        noise = corruption_fun(round(n * eps), d, true_mean=true_mean)
+        print("NOISE")
+        print(noise.shape)
         data = np.concatenate((uncorrupted_data, noise), axis=0)   
     else:
         data = corruption_fun(uncorrupted_data, eps, true_mean)
@@ -58,3 +65,27 @@ def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=Tr
         true_mean = rotation_matrix @ data
    
     return data, good_sample_mean, true_mean
+
+# this will also work to generate corruption!
+def create_fun_from_data(data, uncorrupted=True):
+    """
+    Create data generation function from data to fit into generate_data_helper interface
+    """
+    available_data = data.shape[0] 
+    true_mean = np.mean(data, axis=0)
+    if uncorrupted:
+        def draw_from_data(n, d, mean_fun=None, cov_fun=None):
+            # unused inputs to fit interface
+            random_indices = np.random.choice(available_data, n)
+            drawn_data = data[random_indices]
+            good_sample_mean = np.mean(drawn_data, axis=0)
+            return drawn_data, good_sample_mean, true_mean
+    else:
+        def draw_from_data(n, d, true_mean=None):
+            # unused inputs to fit interface
+            random_indices = np.random.choice(available_data, n)
+            drawn_data = data[random_indices]
+            return drawn_data
+    return draw_from_data
+
+# i want to add feature here to just pull word embeddings straight from here

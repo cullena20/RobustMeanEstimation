@@ -2,6 +2,12 @@
 Contains helper functions for running experiments, notably experiment_suite
 """
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'DataGeneration')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Algorithms')))
+
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -11,8 +17,12 @@ import math
 from simple_estimators import median_of_means
 from lrv import estG1D
 import pickle
+import os
+from data_generation import generate_data_helper, create_fun_from_data
 
-def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_true=True, error_bars=False, save_title=None, plot_good_sample=False, plot=False, style_dict="main", rotate=False, legend=True, sample_scale_cov=False, prune_obvious=False,  pickle_results=False, columns=2, option="error", plot_optimal_error=False, xlabel=None, **kwargs):
+# note that all experiment plots and pickles are saved to ExperimentResults/<save_title> where save_title is supplied
+
+def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_true=True, error_bars=True, save_title=None, plot_good_sample=True, plot=False, style_dict="main", rotate=False, legend=True, sample_scale_cov=False, prune_obvious=False,  pickle_results=False, columns=2, option="error", plot_optimal_error=False, xlabel=None, **kwargs):
     """
     Runs a set of experiments using the supplied estimators, data generation function, and experiments, along with hyperparameters
 
@@ -114,6 +124,26 @@ def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_
         plt.show()
 
     return errors, std_devs
+
+def embedding_experiment_suite(estimators, inlier_data, outlier_data, experiments, runs=5, compare_to_True=True, error_bars=True, save_title=None, plot_good_sample=True, plot=False, style_dict="main", rotate=False, legend=True, sample_scale_cov=False, prune_obvious=False, pickled_results=True, columns=2, option="error", plot_optimal_error=False, xlabel=None, **kwargs):
+    """
+    A wrapper for experiment_suite with all the same parameters for embedding experiments
+    This is used for experiments where inliers are drawn from inlier_data and outliers are drawn from outlier_data.
+    This simply allows users to pass in the inlier_data and outlier_data, without needing to make a new generate_data 
+    function everytime
+    Also handles experiments to set data dimensionality as the d value in the experiment
+    When supplying experiment of form [varying_variable, varying_range, default_n, default_d, default_eps, default_tau],
+    default_d can be arbitrarily specified and will be appropriately modified here
+    """
+    uncorrupted_fun = create_fun_from_data(inlier_data, uncorrupted=True)
+    corrupted_fun = create_fun_from_data(outlier_data, uncorrupted=False)
+    generate_data = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=uncorrupted_fun, corruption_fun=corrupted_fun)
+
+    n, d = inlier_data.shape # note that inlier and outlier data must have same second dime
+    for i in range(len(experiments)):
+        experiments[i][3] = d
+
+    return experiment_suite(estimators, generate_data, experiments, runs=runs, compare_to_True=compare_to_True, error_bars=error_bars, save_title=save_title, plot_good_sample=plot_good_sample, plot=plot, style_dict=style_dict, rotate=rotate, legend=legend, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, pickled_results=pickled_results, columns=columns, option=option, plot_optimal_error=plot_optimal_error, xlabel=xlabel, **kwargs)
 
 # use eps for true corruption, tau for expected corruption
 def run_experiment(estimators, generate_data, varying_variable, varying_range, compare_to_true=True, runs=5, n_fixed=None, d_fixed=None, eps_fixed=None, tau_fixed=None, plot_good_sample=False, plot_optimal_error=False, rotate=False, sample_scale_cov=False, prune_obvious=False, **kwargs):
@@ -648,4 +678,166 @@ lrv_sample_style_dict = {
     'good_sample_mean': {'color': '#17becf', 'marker': '*', 'linestyle': '-', 'linewidth': 2}  # C9
 }
 
+# EMBEDDING EXPERIMENT SETUP
+# the loocv experiment certainly could have been better integrated into the main experimental infrastructure
 
+def loocv(data, estimator, tau, scale=1, original_data=None):
+    """
+    Compute LOOCV error of an estimator on the supplied n by d data.
+    Tau is expected corruption and is input into the mean estimator, and also used
+    in calculating LOOCV error (where we do not include top tau percentage errors in estimate)
+    """
+    # Precompute useful quantities
+    n, d = data.shape
+    mean_all = estimator(data, tau)
+    
+    errors = np.zeros(n)
+    for i in range(n):
+        # Adjust the mean estimation for the left-out point
+        adjusted_mean = (mean_all * n - data[i]) / (n - 1)
+        adjusted_mean *= scale
+        if original_data is None:
+            errors[i] = np.linalg.norm(adjusted_mean - data[i])
+        else:
+            errors[i] = np.linalg.norm(adjusted_mean - original_data[i])
+    
+    errors = np.sort(errors)[:math.floor(n * (1 - tau))]
+    return np.mean(errors)
+
+def draw_from_data(data, x):
+    """
+    Draws x data points from the n by d data.
+    """
+    n, d = data.shape
+    if x > n:
+        x = n
+    random_indices = np.random.choice(n, x, replace=False)
+    return data[random_indices]
+
+import matplotlib.lines as mlines
+
+def loocv_data_size_experiment(data, estimators, varying_range, tau=0.1, measure_error=loocv, num_runs=5, ylabel="LOOCV Error", plot=False, sample_scale_cov=True, prune_obvious=False, verbose=True, save_title=None, d=768, legend=False, pickle_results=True, gsample_legend=False):
+    """
+    LOOCV experiment vs data size.
+    """
+    # first need to initialize error arrays for every estimator
+    error_arrays = {}
+    for estimator_name in estimators.keys():
+        error_arrays[estimator_name] = np.zeros((num_runs, len(varying_range)))
+
+    for run in range(num_runs): 
+        print(f"Run Number {run}")
+        for i, n in enumerate(varying_range):
+            temp_data = draw_from_data(data, n)
+            _, d = temp_data.shape
+            if prune_obvious:
+                # prune using the shell method
+                # use lrv trace and median of means
+                temp_data = prune_obvious_fun(temp_data, mean_option=1, trace_option=0)
+
+            if sample_scale_cov=="sample":
+                # sample scale covariance method described in paper and used by default
+                trace = np.trace(np.cov(temp_data, rowvar=False)) # Just calculate sample covariance
+                std_est = math.sqrt(trace/d) # now we have a coordinate wise variance estimate to scale data by
+                scaled_data = temp_data / std_est # data should now have identity covariance
+            # attempted some other methods, which do not help
+            if sample_scale_cov=="lrv":
+                # lrv trace
+                trace, _ = trace_est(temp_data)
+                std_est = math.sqrt(trace/d) # now we have a coordinate wise variance estimate to scale data by
+                scaled_data = temp_data / std_est # data should now have identity covariance
+            if sample_scale_cov=="sample2":
+                # sample trace
+                trace = np.trace(np.cov(temp_data, rowvar=False)) # Just calculate sample covariance
+                std_est = 2 * math.sqrt(trace/d) # overestimate -> scale smaller
+                scaled_data = temp_data / std_est # data should now have identity covariance
+            if sample_scale_cov=="lrv2":
+                trace, _ = trace_est(temp_data)
+                std_est = 2* math.sqrt(trace/d) # now we have a coordinate wise variance estimate to scale data by
+                scaled_data = temp_data / std_est # data should now have identity covariance
+
+            for name, estimator in estimators.items():
+                if sample_scale_cov and (name.startswith("ev_filtering") or name == "ransac_mean" or name.startswith("que")):
+                    error_arrays[name][run][i] = measure_error(scaled_data, estimator, tau, scale=std_est, original_data=temp_data)
+                else:
+                    error_arrays[name][run][i] = measure_error(temp_data, estimator, tau)
+
+    # Compute mean and standard deviation of errors
+    mean_errors = {}
+    std_errors = {}
+    for estimator_name in estimators.keys():
+        mean_errors[estimator_name] = np.mean(error_arrays[estimator_name], axis=0)
+        std_errors[estimator_name] = np.std(error_arrays[estimator_name], axis=0)
+
+    plt.figure()
+
+    # Plot with error bars using fill_between
+    for estimator_name in estimators.keys():
+        style = main_style_dict[estimator_name] # main_style_dict is global variable here, not the most ideal but works
+        plt.plot(varying_range, mean_errors[estimator_name], label=estimator_name, color=style['color'], marker=style['marker'], linestyle=style['linestyle'], 
+                            linewidth=style['linewidth'], alpha=0.8)
+        plt.fill_between(varying_range, mean_errors[estimator_name] - std_errors[estimator_name], mean_errors[estimator_name] + std_errors[estimator_name], color=style['color'], alpha=0.3)
+
+    if gsample_legend and legend:
+        # Manually add "good_sample_mean" to the legend
+        style = main_style_dict["good_sample_mean"]
+        good_sample_mean = mlines.Line2D([], [], label="good_sample_mean", color=style['color'], marker=style['marker'], linestyle=style['linestyle'], 
+                            linewidth=style['linewidth'], alpha=0.8)
+
+        # Add to the legend
+        if legend:
+            plt.legend(handles=[*plt.gca().get_legend_handles_labels()[0], good_sample_mean])
+
+
+    elif legend:
+        plt.legend()
+
+    plt.title(f"{ylabel} vs Data Size\nDimensions: {d}, Expected Corruption: 0.10")
+    plt.xlabel("Data Size")
+    plt.ylabel(ylabel)
+    if plot:
+        plt.show()
+    
+    if save_title:
+        plt.savefig(f"LanguageExperiments/Results/{save_title}")
+        plt.close()
+    
+    if pickle_results and save_title:
+        filename = f"LanguageExperiments/Results/{save_title}.pkl"
+
+        data_to_pickle = {
+            "errors": mean_errors,
+            "stds": std_errors,
+            "error_arrays": error_arrays,
+        }
+
+        with open(filename, "wb") as f:
+            pickle.dump(data_to_pickle, f)
+
+    return error_arrays
+
+# unpickle code used to get word embeddings in desired form
+# MIGHT BE BROKEN WITH NEW FILE STRUCTURE
+def unpickle(file_name):
+    # Get the current directory (Experiments)
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+
+    # Move up two levels to reach 'RobustStatsTuned'
+    root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+
+    # Now build the path for Embeddings/GloVeEmbeddings
+    pickle_file_path = os.path.join(root_dir, f"{file_name}.pickle")
+
+    with open(pickle_file_path, "rb") as pickle_file:
+        word_vectors_dic = pickle.load(pickle_file)
+
+    # Collect word vectors into a list
+    word_vectors_list = []
+    for vector in word_vectors_dic.values():
+        if vector is not None:
+            word_vectors_list.append(vector)
+
+    # Convert list of vectors into a numpy array
+    word_vectors = np.array(word_vectors_list)
+
+    return word_vectors

@@ -5,7 +5,7 @@ Plot threshold comparisons
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-from setup import gaussian_data
+from synthetic_setup import gaussian_data
 
 d = 500
 tau = 0.1
