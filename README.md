@@ -7,7 +7,7 @@ It includes a suite of robust mean estimation algorithms and experimental infras
 
 Mean estimators are located in Algorithms. Each mean estimator is of the form: mean_estimator(data, tau, **kwargs) => mean_estimate. Data is in the form of n by d numpy arrays, where n is the data size, and d is the dimensionality of the data. Tau is the expected corruption of the data. **kwargs are keyword arguments specific to the mean estimator. Mean_estimate is a d dimensional mean estimate.
 
-To call a mean estimator on your data, simply pass in the data and expected corruption. You can experiment with hyperparameters, but default values are already supplied for all estimators. Most estimators are not overly sensitive to the choice of expected corruption, so overestimates tend to work fine.
+To call a mean estimator on your data, simply pass in the data and expected corruption. You can experiment with hyperparameters, but default values are already supplied for all estimators. Most estimators are not overly sensitive to the choice of expected corruption, so overestimates of tau tend to work fine.
 
 For example, to return means found by quantum entropy scoring, eigenvalue filtering, and median of means of your data simply run the following.
 
@@ -18,11 +18,11 @@ from simple_estimators import median_of_means
 import numpy as np
 
 data = ... # sub in your data, ensuring that it is a numpy array of the appropriate convention
-tau = 0.3
+tau = 0.3 # an overestimate of true corruption tends to work fine
 
 ev_mean_estimate = eigenvalue_pruning(data, tau)
 que_mean_estimate = que_mean(data, tau)
-med_mean_estimate = median_of_means(tau)
+med_mean_estimate = median_of_means(data, tau)
 `
 
 ## Data Generation
@@ -57,5 +57,52 @@ true_error = np.linalg.norm(que_mean_estimate - true_mean)
 
 ## Running Experiments
 
-More extensive experiments can be performed using the functions in helper.py under Experiments. setup.py and main_experiments.py setup the experiments in our paper. We defer the reader to these files to see how to run more sophisticated experiments.
+More extensive experiments can be performed using the functions in helper.py under Experiments. We build infrastructure to perform experiments to examine error (defined as the Euclidean distance from a mean estimate to the true mean or to the sample mean of the inliers) as we vary data size, dimensionality, true corruption, expected corruption, or in the case of non identity covariance the top eigenvalue. Each run of an experiment will return a plot of errors versus the variable being varied, along with a pickle file with the errors and standard deviations of each algorithm. To run a set of experiments, first define the default variables and variables being varied. Each experiment will be an array of the following form: [varying_variable, varying_range, default_n, default_d, default_eps, default_tau] where the default value for the variable being varied is set to None. A list of individual experiments can be made to define a series of experiments that will be ran and plotted in a grid. To recreate the majority of experiments in the paper, this can be done as follows:
 
+```python
+default_n = 500
+default_d = 500
+default_eps = 0.1
+default_tau = None # tau = None means that we will use tau=eps
+
+experiments = [["n", np.arange(20, 5021, 500), None, default_d, default_eps, default_tau],
+               ["n", np.arange(20, 521, 50), None, default_d, default_eps, default_tau],
+               ["d", np.arange(20, 1021,  100), default_n, None, default_eps, default_tau],
+               ["eps", np.arange(0, 0.46, 0.05), default_n, default_d, None, default_tau]]
+```
+
+Now define a data generation function that takes in data size, dimensionality, and corruption at every iteration of the experiment. This can be done using generate_data_helper as follows, where we recreate additive variance shell noise over identity covariance data:
+
+```python
+id_gaussian_corruption_one_cluster = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=gaussian_data, noise_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+```
+
+To utilize different distributions, we can modify the inlier data generating function and the corruption generating function.
+
+Then, we must define a dictionary of estimators that we wish to evalute. Say we wish to just evaluate quantum entropy scoring, the sample mean, and median of means. Then we can define a dictionary of estimators as follows:
+
+```python
+from que import que_mean
+from simple_estimators import sample_mean, median_of_means
+
+main_estimators = {
+    "sample_mean": lambda data, tau: sample_mean(data),
+    "median_of_means": lambda data, tau: median_of_means(data, 10),
+    "que_low_n": lambda data, tau: que_mean(data, tau),
+}
+```
+
+Note how we are using lambda functions to enforce the appropriate interfaces. Then a simple experiment can be run as follows:
+
+```python
+errors, stds = experiment_suite(estimators, id_gaussian_corruption_one_cluster, experiments, runs=5, save_title="simple_experiment")
+```
+
+This call will return a dictionary of errors and standard deviations for each estimator and will also save the plotted results under "simple_experiment.png".
+
+
+setup.py and main_experiments.py setup and run the experiments in our paper. We defer the reader to these files to see how to run more sophisticated experiments. 
+
+## Real World Experiments
+
+We additionally provide the embeddings that we utilized for experiments on large language model, deep pretrained image model, and context free word embeddings under Embeddings. 
