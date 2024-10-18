@@ -11,7 +11,7 @@ To call a mean estimator on your data, simply pass in the data and expected corr
 
 For example, to return means found by quantum entropy scoring, eigenvalue filtering, and median of means of your data simply run the following.
 
-`
+```python
 from eigenvalue_pruning import eigenvalue_pruning
 from que import que_mean
 from simple_estimators import median_of_means
@@ -23,7 +23,7 @@ tau = 0.3 # an overestimate of true corruption tends to work fine
 ev_mean_estimate = eigenvalue_pruning(data, tau)
 que_mean_estimate = que_mean(data, tau)
 med_mean_estimate = median_of_means(data, tau)
-`
+```
 
 ## Data Generation
 
@@ -31,7 +31,7 @@ Data generation functions are located in DataGeneration. data_generation.py cont
 
 For example, say you want to generate gaussian data corrupted with additive variance shell noise and examine the mean.
 
-`
+```python
 from data_generation import generate_data_helper
 from inlier_data import gaussian_data
 from corruption_schemes import gaussian_noise_one_cluster
@@ -41,11 +41,11 @@ d = 1000 # dimensions
 eta = 0.2 # corruption percentage
 
 data, good_sample_mean, true_mean = generate_data_helper(n, d, eta, gaussian_data, gaussian_noise_one_cluster)
-`
+```
 
 Now you can perform experiments using this data, such as examining the error of mean estimates compared to the good_sample_mean or true_mean. To continue we may have the following.
 
-`
+```python
 from que import que_mean
 import numpy as np
 
@@ -53,7 +53,7 @@ que_mean_estimate = que_mean(data)
 
 sample_error = np.linalg.norm(que_mean_estimate - good_sample_mean)
 true_error = np.linalg.norm(que_mean_estimate - true_mean)
-`
+```
 
 ## Running Experiments
 
