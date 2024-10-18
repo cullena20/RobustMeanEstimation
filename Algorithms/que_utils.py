@@ -1,7 +1,6 @@
-
-'''
-Utilities functions
-'''
+"""
+QUE Utilities function directly from https://github.com/twistedcubic/que-outlier-detection
+"""
 from __future__ import unicode_literals
 import matplotlib
 matplotlib.use('agg')

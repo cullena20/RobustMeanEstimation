@@ -1,20 +1,23 @@
 """
-Inlier data generation schemes
+Inlier data generation scheme
 
-All data generation schemes should be of form:
+All data generation schemes should be of type signature:
 
-data_size, dimensions, mean_fun, cov_fun 
-=> data (np.ndarray: data_size by dimensions), 
-   good_sample_mean (np.ndarray: dimensions)
-   mean (np.ndarray: size dimensions)
+data_size: integer, dimensions: integer, mean_fun: dimensions => np.ndarray with size (dimensions, ), cov_fun: np.ndarray with size (dimensions, dimensions) 
+=> data : np.ndarray with size (data_size, dimensions)), 
+   good_sample_mean : np.ndarray with size (dimensions, ),
+   mean : np.ndarray with size (dimensions, )
+
+good_sample_mean is the mean of the inliers
+mean is the true mean that the distribution is generated from
 """
 
 import numpy as np
 
 def gaussian_data(n, d, mean_fun=None, cov_fun=None):
     """
-    Generate Gaussian data with n data points and d dimensions as n by d numpy matrix
-
+    Generate Gaussian data with n data points and d dimensions as n by d numpy matrix.
+    Defaulte to mean of all ones and identity covariance if no mean_fun or cov_fun are supplied
     """
     if mean_fun is None:
         mean = np.ones(d)
@@ -29,7 +32,3 @@ def gaussian_data(n, d, mean_fun=None, cov_fun=None):
     good_sample_mean = np.mean(data, axis=0)
 
     return data, good_sample_mean, mean    
-
-data, good_sample_mean, _ = gaussian_data(50, 10)
-print(data.shape)
-print(good_sample_mean.shape)

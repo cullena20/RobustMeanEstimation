@@ -1,3 +1,12 @@
+"""
+A collection of simple mean estimation functions:
+  - Sample Mean
+  - Coordinate Wise Median
+  - Median Of Means
+  - Coordinate Wise Trimmed Mean
+  - Geometric Median
+"""
+
 import numpy as np
 import math
 
@@ -27,7 +36,7 @@ def coordinate_wise_median(data):
   return np.median(data, axis = 0)
 
 # num_blocks blocks
-def median_of_means(data, num_blocks):
+def median_of_means(data, num_blocks=10):
   """
   Computes the Median of Means (MoM) estimator.
   
@@ -102,36 +111,3 @@ def geometric_median(data, iters=2):
     curr_estimate = num / den
 
   return curr_estimate
-
-# CAN DELETE BELOW
-
-# Old naive prune options
-# Delete after cleaning up setup code
-def naive_prune0(data, tau):
-  # remove tau percent furthest points from mean estimate
-  n, d = data.shape
-  median = coordinate_wise_median(data)
-  diff = np.linalg.norm(data - median, axis=1)
-  sorted_indices = np.argsort(diff)
-  data = data[sorted_indices]
-  return np.mean(data[:math.ceil((1-tau)*n)], axis=0)
-
-def naive_prune_no_eps(data):
-  C = 5
-  n, d = data.shape
-  median = coordinate_wise_median(data)
-  diff = np.linalg.norm(data - median, axis=1)
-  filtered_indices = diff <= C * math.sqrt(d)
-  pruned_data = data[filtered_indices]
-  return np.mean(pruned_data, axis=0)
-
-# def naive_prune_spherical_no_eps(data):
-#   C = 5
-#   n, d = data.shape
-#   trace, _ = trace_est(data)
-#   std = math.sqrt(trace / d)
-#   median = coordinate_wise_median(data)
-#   diff = np.linalg.norm(data - median, axis=1)
-#   filtered_indices = diff <= C * math.sqrt(d) * std
-#   pruned_data = data[filtered_indices]
-#   return np.mean(pruned_data, axis=0)
