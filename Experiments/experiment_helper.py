@@ -1,5 +1,5 @@
 """
-Contains helper functions for running experiments, notably experiment_suite
+Contains helper functions for running experiments, notably experiment_suite and embedding_experiment_suite
 """
 
 import sys
@@ -29,9 +29,9 @@ def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_
     Parameters:
         estimators - a dictionary of mean estimators of type: data, tau => mean_estimate
         generate_data - a data generation function that returns data, good_sample_mean (mean of inlieres), and true_mean (mean data is generated from)
-        experiments - array of experiments - each individual experiment is of form [varying_variable, varying_range, n_fixed, d_fixed, eps_fixed, tau_fixed]
-                    note eps here is true corruption percentage, as opposed to eta
-                    note varying_variable is "n", "d", "eps", "tau", or "data")
+        experiments - array of experiments - each individual experiment is of form [varying_variable, varying_range, n_fixed, d_fixed, eta_fixed, tau_fixed]
+                    note eta here is true corruption percentage, as opposed to eta
+                    note varying_variable is "n", "d", "eta", "tau", or "data")
                     note [varying_variable]_fixed should be set to 0 (except if varying_variable is "data")
                     A seperate plot will be generated for each experiment, and they will be merged into a grid
                     The default setting is to generate a 2 by 2 grid for 4 experiments
@@ -67,13 +67,13 @@ def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_
         varying_range = experiment[1]
         n_fixed = experiment[2]
         d_fixed = experiment[3]
-        eps_fixed = experiment[4]
+        eta_fixed = experiment[4]
         tau_fixed = experiment[5]
 
         if option=="error":
-            error, std_devs = run_experiment(estimators, generate_data, varying_variable, varying_range, n_fixed=n_fixed, d_fixed=d_fixed, eps_fixed=eps_fixed, tau_fixed=tau_fixed, runs=runs, compare_to_true=compare_to_true, plot_good_sample=plot_good_sample, plot_optimal_error=plot_optimal_error, rotate=rotate, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, **kwargs)
+            error, std_devs = run_experiment(estimators, generate_data, varying_variable, varying_range, n_fixed=n_fixed, d_fixed=d_fixed, eta_fixed=eta_fixed, tau_fixed=tau_fixed, runs=runs, compare_to_true=compare_to_true, plot_good_sample=plot_good_sample, plot_optimal_error=plot_optimal_error, rotate=rotate, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, **kwargs)
         elif option=="time":
-            error, std_devs = run_time_experiment(estimators, generate_data, varying_variable, varying_range, n_fixed=n_fixed, d_fixed=d_fixed, eps_fixed=eps_fixed, tau_fixed=tau_fixed, runs=runs, compare_to_true=compare_to_true, plot_good_sample=plot_good_sample, plot_optimal_error=plot_optimal_error, rotate=rotate, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, **kwargs)
+            error, std_devs = run_time_experiment(estimators, generate_data, varying_variable, varying_range, n_fixed=n_fixed, d_fixed=d_fixed, eta_fixed=eta_fixed, tau_fixed=tau_fixed, runs=runs, compare_to_true=compare_to_true, plot_good_sample=plot_good_sample, plot_optimal_error=plot_optimal_error, rotate=rotate, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, **kwargs)
         errors.append(error)
         std_dev_list.append(std_devs)
         
@@ -84,7 +84,7 @@ def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_
             xlabel = "Data Size"
         elif varying_variable == "d":
             xlabel = "Dimensions"
-        elif varying_variable == "eps":
+        elif varying_variable == "eta":
             xlabel = "Corruption"
         elif varying_variable == "tau":
             xlabel = "Expected Corruption"
@@ -98,7 +98,7 @@ def experiment_suite(estimators, generate_data, experiments, runs=5, compare_to_
         col = idx % columns
         ax = axs[row, col] if rows > 1 else axs[col]
         try: 
-            plot_results(error, varying_range, xlabel, std_devs=std_devs, error_bars=error_bars, n_fixed=n_fixed, d_fixed=d_fixed, eps_fixed=eps_fixed, tau_fixed=tau_fixed, ax=ax, style_dict=style_dict, option=option)
+            plot_results(error, varying_range, xlabel, std_devs=std_devs, error_bars=error_bars, n_fixed=n_fixed, d_fixed=d_fixed, eta_fixed=eta_fixed, tau_fixed=tau_fixed, ax=ax, style_dict=style_dict, option=option)
             if idx == 0 and legend:
                 ax.legend()
             plt.tight_layout()
@@ -132,12 +132,12 @@ def embedding_experiment_suite(estimators, inlier_data, outlier_data, experiment
     This simply allows users to pass in the inlier_data and outlier_data, without needing to make a new generate_data 
     function everytime
     Also handles experiments to set data dimensionality as the d value in the experiment
-    When supplying experiment of form [varying_variable, varying_range, default_n, default_d, default_eps, default_tau],
+    When supplying experiment of form [varying_variable, varying_range, default_n, default_d, default_eta, default_tau],
     default_d can be arbitrarily specified and will be appropriately modified here
     """
     uncorrupted_fun = create_fun_from_data(inlier_data, uncorrupted=True)
     corrupted_fun = create_fun_from_data(outlier_data, uncorrupted=False)
-    generate_data = lambda n, d, eps: generate_data_helper(n, d, eps, uncorrupted_fun=uncorrupted_fun, corruption_fun=corrupted_fun)
+    generate_data = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=uncorrupted_fun, corruption_fun=corrupted_fun)
 
     n, d = inlier_data.shape # note that inlier and outlier data must have same second dime
     for i in range(len(experiments)):
@@ -145,8 +145,8 @@ def embedding_experiment_suite(estimators, inlier_data, outlier_data, experiment
 
     return experiment_suite(estimators, generate_data, experiments, runs=runs, compare_to_True=compare_to_True, error_bars=error_bars, save_title=save_title, plot_good_sample=plot_good_sample, plot=plot, style_dict=style_dict, rotate=rotate, legend=legend, sample_scale_cov=sample_scale_cov, prune_obvious=prune_obvious, pickled_results=pickled_results, columns=columns, option=option, plot_optimal_error=plot_optimal_error, xlabel=xlabel, **kwargs)
 
-# use eps for true corruption, tau for expected corruption
-def run_experiment(estimators, generate_data, varying_variable, varying_range, compare_to_true=True, runs=5, n_fixed=None, d_fixed=None, eps_fixed=None, tau_fixed=None, plot_good_sample=False, plot_optimal_error=False, rotate=False, sample_scale_cov=False, prune_obvious=False, **kwargs):
+# use eta for true corruption, tau for expected corruption
+def run_experiment(estimators, generate_data, varying_variable, varying_range, compare_to_true=True, runs=5, n_fixed=None, d_fixed=None, eta_fixed=None, tau_fixed=None, plot_good_sample=False, plot_optimal_error=False, rotate=False, sample_scale_cov=False, prune_obvious=False, **kwargs):
     """
     Run a single experiment 
     """
@@ -173,44 +173,44 @@ def run_experiment(estimators, generate_data, varying_variable, varying_range, c
             if varying_variable == "data":
                 n = n_fixed
                 d = d_fixed
-                eps = eps_fixed
+                eta = eta_fixed
                 if tau_fixed is None:
-                    tau = eps
+                    tau = eta
                 else:
                     tau = tau_fixed
-                X, good_sample_mean, true_mean = generate_data(n, d, eps, value)
+                X, good_sample_mean, true_mean = generate_data(n, d, eta, value)
             else:
                 if varying_variable == "n": # data points
                     n = value
                     d = d_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
                 elif varying_variable == "d": # dimensions
                     d = value
                     n = n_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
-                elif varying_variable == "eps": # true corruption
-                    eps = value
+                elif varying_variable == "eta": # true corruption
+                    eta = value
                     n = n_fixed
                     d = d_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
                 elif varying_variable == "tau": # expected corruption
                     n = n_fixed
                     d = d_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     tau = value
 
-                X, good_sample_mean, true_mean = generate_data(n, d, eps)
+                X, good_sample_mean, true_mean = generate_data(n, d, eta)
             
             if rotate:
                 rotation_matrix = random_rotation_matrix(d)
@@ -248,10 +248,10 @@ def run_experiment(estimators, generate_data, varying_variable, varying_range, c
                 errors["good_sample_mean"][idx][run] = error
             # we don't ever use below
             if plot_optimal_error and compare_to_true:
-                error1 = math.sqrt(d/n) + eps
+                error1 = math.sqrt(d/n) + eta
                 errors["optimal_error1"][idx][run] = error1
             elif plot_optimal_error and not compare_to_true:
-                error1 = eps
+                error1 = eta
                 errors["optimal_error1"][idx][run] = error1
   
 
@@ -270,7 +270,7 @@ def run_experiment(estimators, generate_data, varying_variable, varying_range, c
     return average_errors, std
 
 # need to change how I deal with this style dict business
-def plot_results(errors, varying_range, xlabel, std_devs=None, error_bars=False, n_fixed=None, d_fixed=None, eps_fixed=None, tau_fixed=None, ax=None, style_dict=None, option="error"):
+def plot_results(errors, varying_range, xlabel, std_devs=None, error_bars=False, n_fixed=None, d_fixed=None, eta_fixed=None, tau_fixed=None, ax=None, style_dict=None, option="error"):
     '''
     Plots filter error and sample error vs varying_variable. Sample error is subtracted from error so that 0 error represents 0 good sample
     error. The varying_variable is labeled by x_label. Other values held constant may be supplied to print out more information.
@@ -331,7 +331,7 @@ def plot_results(errors, varying_range, xlabel, std_devs=None, error_bars=False,
     else:
         ax.set_ylabel('Error')
 
-    if n_fixed is not None or d_fixed is not None or eps_fixed is not None or tau_fixed is not None:
+    if n_fixed is not None or d_fixed is not None or eta_fixed is not None or tau_fixed is not None:
         if option == "time":
             title = f'Time vs {xlabel}\n'
         else:
@@ -342,8 +342,8 @@ def plot_results(errors, varying_range, xlabel, std_devs=None, error_bars=False,
             title += f'Dimensions: {d_fixed}, '
         if tau_fixed is not None:
             title += f'Expected Corruption: {tau_fixed:.2f}, '
-        if eps_fixed is not None:
-            title += f'Corruption Percentage: {eps_fixed:.2f}, '
+        if eta_fixed is not None:
+            title += f'Corruption Percentage: {eta_fixed:.2f}, '
         ax.set_title(title[:-2])
 
 def random_rotation_matrix(d):
@@ -437,7 +437,7 @@ def trace_est(data):
   return T, Z
 
 # brute force copy and paste experiment to measure times, really this should be done while running experiments
-def run_time_experiment(estimators, generate_data, varying_variable, varying_range, compare_to_true=True, runs=10, n_fixed=None, d_fixed=None, eps_fixed=None, tau_fixed=None, plot_good_sample=False, plot_optimal_error=False, rotate=False, sample_scale_cov=False, prune_obvious=False, **kwargs):
+def run_time_experiment(estimators, generate_data, varying_variable, varying_range, compare_to_true=True, runs=10, n_fixed=None, d_fixed=None, eta_fixed=None, tau_fixed=None, plot_good_sample=False, plot_optimal_error=False, rotate=False, sample_scale_cov=False, prune_obvious=False, **kwargs):
     errors = {key: [np.empty(runs) for _ in range(len(varying_range))] for key in estimators.keys()}
     average_errors = {key: [] for key in estimators.keys()}
     std = {key: [] for key in estimators.keys()}
@@ -453,44 +453,44 @@ def run_time_experiment(estimators, generate_data, varying_variable, varying_ran
             if varying_variable == "data":
                 n = n_fixed
                 d = d_fixed
-                eps = eps_fixed
+                eta = eta_fixed
                 if tau_fixed is None:
-                    tau = eps
+                    tau = eta
                 else:
                     tau = tau_fixed
-                X, good_sample_mean, true_mean = generate_data(n, d, eps, value)
+                X, good_sample_mean, true_mean = generate_data(n, d, eta, value)
             else:
                 if varying_variable == "n": # data points
                     n = value
                     d = d_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
                 elif varying_variable == "d": # dimensions
                     d = value
                     n = n_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
-                elif varying_variable == "eps": # true corruption
-                    eps = value
+                elif varying_variable == "eta": # true corruption
+                    eta = value
                     n = n_fixed
                     d = d_fixed
                     if tau_fixed is None:
-                        tau = eps
+                        tau = eta
                     else:
                         tau = tau_fixed
                 elif varying_variable == "tau": # expected corruption
                     n = n_fixed
                     d = d_fixed
-                    eps = eps_fixed
+                    eta = eta_fixed
                     tau = value
 
-                X, good_sample_mean, true_mean = generate_data(n, d, eps)
+                X, good_sample_mean, true_mean = generate_data(n, d, eta)
             
 
             # pretty sure the below makes sense, should double check

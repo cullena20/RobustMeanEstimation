@@ -1,5 +1,7 @@
 '''
-Generate corrupted data schemes
+Data generation wrappers:
+    - generate_data_helper: generate corrupted data given uncorrupted and corrupted data generating functions
+    - create_fun_from_data: build data generators for generate_data_helper given data
 '''
 
 import numpy as np
@@ -46,13 +48,8 @@ def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=Tr
 
     uncorrupted_data, good_sample_mean, true_mean = uncorrupted_fun(good_data_size, d, mean_fun=mean_fun, cov_fun=cov_fun)
 
-    print("UNCORRUPTED")
-    print(uncorrupted_data.shape)
-
     if additive:
         noise = corruption_fun(round(n * eps), d, true_mean=true_mean)
-        print("NOISE")
-        print(noise.shape)
         data = np.concatenate((uncorrupted_data, noise), axis=0)   
     else:
         data = corruption_fun(uncorrupted_data, eps, true_mean)
@@ -66,10 +63,12 @@ def generate_data_helper(n, d, eps, uncorrupted_fun, corruption_fun, additive=Tr
    
     return data, good_sample_mean, true_mean
 
-# this will also work to generate corruption!
+# Use this function to input your own data into generate_data_helper
 def create_fun_from_data(data, uncorrupted=True):
     """
     Create data generation function from data to fit into generate_data_helper interface
+    uncorrupted = True generates a function that fits uncorrupted_fun interface in generate_data_helper
+    uncorrupted = False generates a function that fits corrupted_fun interface in generate_data_helper
     """
     available_data = data.shape[0] 
     true_mean = np.mean(data, axis=0)
@@ -87,5 +86,3 @@ def create_fun_from_data(data, uncorrupted=True):
             drawn_data = data[random_indices]
             return drawn_data
     return draw_from_data
-
-# i want to add feature here to just pull word embeddings straight from here

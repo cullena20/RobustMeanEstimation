@@ -1,7 +1,9 @@
 # Robust Mean Estimation Suite
 
 This code accompanies the paper "Robust High-Dimensional Mean Estimation With Low Data Size". 
-It includes a suite of robust mean estimation algorithms and experimental infrastructure to run your own experiments and recreate the experiments in the paper.
+It includes a suite of robust mean estimation algorithms and experimental infrastructure to run your own experiments over your own settings, algorithms, and data. We also provide files to recreate the experiments in the paper.
+
+Here we cover some main usage points of this library. See basic_usage.py for a code tutorial to 1) Use mean estimators and data generating functions 2) recreate synthetic data experiments similar to those seen in the paper and define your own experiments 3) perform experiments over your own data and recreate embedding experiments seen in the paper.
 
 ## Calling Robust Mean Estimation Algorithms
 
@@ -55,6 +57,8 @@ sample_error = np.linalg.norm(que_mean_estimate - good_sample_mean)
 true_error = np.linalg.norm(que_mean_estimate - true_mean)
 ```
 
+You can also fit your own data into this interface using create_fun_from_data. This function takes in data and returns a data generation function that randomly draws from the data supplied. This can be used as an uncorrupted or corrupted function in generate_data helper, hence allowing experiments to be run using our interfaces.
+
 ## Running Experiments
 
 More extensive experiments can be performed using the functions in helper.py under Experiments. We build infrastructure to perform experiments to examine error (defined as the Euclidean distance from a mean estimate to the true mean or to the sample mean of the inliers) as we vary data size, dimensionality, true corruption, expected corruption, or in the case of non identity covariance the top eigenvalue. Each run of an experiment will return a plot of errors versus the variable being varied, along with a pickle file with the errors and standard deviations of each algorithm. To run a set of experiments, first define the default variables and variables being varied. Each experiment will be an array of the following form: [varying_variable, varying_range, default_n, default_d, default_eps, default_tau] where the default value for the variable being varied is set to None. A list of individual experiments can be made to define a series of experiments that will be ran and plotted in a grid. To recreate the majority of experiments in the paper, this can be done as follows:
@@ -100,9 +104,10 @@ errors, stds = experiment_suite(estimators, id_gaussian_corruption_one_cluster, 
 
 This call will return a dictionary of errors and standard deviations for each estimator and will also save the plotted results under "simple_experiment.png".
 
+This experimental infrastructure can be adapted to your own supplied data by creating a data generation function that draws from this data. embedding_experiment_suite does this for you and allows for experiments where inlier data and corruption are drawn from two provided data sets of the same dimensionality. To further personalize this, you can directly define data generation functions to allow for more sophisticated corruption schemes based on your own data.
 
-setup.py and main_experiments.py setup and run the experiments in our paper. We defer the reader to these files to see how to run more sophisticated experiments. 
+synthetic_setup.py and synthetic_experiments.py setup and run the synthetic experiments in our paper. embedding_setup.py and embedding_experiments.py setup and run the embedding experiments in our paper. These can be run to replicate our results and can be examined to see how you might run more sophisticated experiments. 
 
-## Real World Experiments
+## Embeddings
 
 We additionally provide the embeddings that we utilized for experiments on large language model, deep pretrained image model, and context free word embeddings under Embeddings. 

@@ -1,7 +1,12 @@
+"""
+Replicate experiments over LLM embeddings, deep pretrained image model embeddings, and GloVe context free word embeddings.
+"""
+
+
 from embedding_setup import field_study_bert768, field_land_bert768, field_study_minillm384, field_land_minillm384,field_study_albert768, field_land_albert768, field_study_t5_512, field_land_t5_512
 from embedding_setup import resnet18_512_cat, resnet18_512_dog, mobilenet_960_cat, mobilenet_960_dog, effecientnet_1280_cat, effecientnet_1280_dog, resnet50_2048_cat, resnet50_2048_dog
 from embedding_setup import pleasant50, unpleasant50, pleasant100, unpleasant100, pleasant200, unpleasant200, pleasant300, unpleasant300
-from embedding_setup import main_estimators, test_estimators
+from embedding_setup import main_estimators
 from embedding_setup import llm_loocv_var_range, img_loocv_var_range, glove_loocv_var_range
 from embedding_setup import llm_corrupted_experiment, img_corrupted_experiment, glove_corrupted_experiment, img_corrupted_experiment_vs_n
 from experiment_helper import loocv_data_size_experiment, embedding_experiment_suite
@@ -81,11 +86,17 @@ embedding_experiment_suite(main_estimators, field_land_minillm384, field_study_m
 embedding_experiment_suite(main_estimators, field_land_t5_512, field_study_t5_512, llm_corrupted_experiment, save_title="T5512_Corruption", sample_scale_cov=True, num_runs=num_runs, legend=False)
 embedding_experiment_suite(main_estimators, field_land_bert768, field_study_bert768, llm_corrupted_experiment, save_title="BERT768_Corruption", sample_scale_cov=True, num_runs=num_runs, legend=False)
 embedding_experiment_suite(main_estimators, field_land_albert768, field_study_albert768, llm_corrupted_experiment, save_title="ALBERT768_Corruption", sample_scale_cov=True, num_runs=num_runs, legend=False)
+
 print("LLM Corrupted Experiment - Study corrupted with Land")
 embedding_experiment_suite(main_estimators, field_study_minillm384, field_land_minillm384, llm_corrupted_experiment, save_title="MiniLLM384_Corruption_Inv", sample_scale_cov=True, num_runs=num_runs, legend=True)
 embedding_experiment_suite(main_estimators, field_study_t5_512, field_land_t5_512, llm_corrupted_experiment, save_title="T5512_Corruption_Inv", sample_scale_cov=True, num_runs=num_runs, legend=False)
 embedding_experiment_suite(main_estimators, field_study_bert768, field_land_bert768, llm_corrupted_experiment, save_title="BERT768_Corruption_Inv", sample_scale_cov=True, num_runs=num_runs, legend=False)
 embedding_experiment_suite(main_estimators, field_study_albert768, field_land_albert768, llm_corrupted_experiment, save_title="ALBERT768_Corruption_Inv", sample_scale_cov=True, num_runs=num_runs, legend=False)
 
+print("Image Corrupted Experiments VS DATA SIZE - Cat corrupted with Dog")
+embedding_experiment_suite(main_estimators, resnet18_512_cat, resnet18_512_dog, img_corrupted_experiment_vs_n, save_title="ResNet512_CorruptionVsN", sample_scale_cov=True, num_runs=num_runs, legend=True)
+embedding_experiment_suite(main_estimators, mobilenet_960_cat, mobilenet_960_dog, img_corrupted_experiment_vs_n, save_title="MobileNet960_CorruptionVsN", sample_scale_cov=True, num_runs=num_runs, legend=False)
+embedding_experiment_suite(main_estimators, effecientnet_1280_cat, effecientnet_1280_dog, img_corrupted_experiment_vs_n, save_title="EfficientNet1280_CorruptionVsN", sample_scale_cov=True, num_runs=num_runs, legend=False)
+embedding_experiment_suite(main_estimators, resnet50_2048_cat, resnet50_2048_dog, img_corrupted_experiment_vs_n, save_title="ResNet2048_CorruptionVsN", sample_scale_cov=True, num_runs=num_runs, legend=False)
 
 print("CORRUPTED DATA EXPERIMENTS COMPLETE")

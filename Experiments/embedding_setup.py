@@ -1,39 +1,44 @@
+"""
+Setup for embedding experiments. Loads embeddings, defines experiments, and estimators
+"""
+
 from experiment_helper import unpickle
 import numpy as np
 from eigenvalue_pruning import eigenvalue_pruning
-from lee_valiant import lee_valiant_original, lee_valiant_simple
+from lee_valiant import lee_valiant_simple
 from lrv import lrv
 from simple_estimators import sample_mean, coordinate_wise_median, median_of_means, geometric_median, coord_trimmed_mean
 from que import que_mean
 from pgd import grad_descent
+import os
+
+# Set current_dir to one level above the current directory
+current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 # LOAD LLM WORD EMBEDDINGS
-bert768 = np.load("LanguageExperiments/LanguageEmbeddings/Bert768field_embeddings.npz")
+bert768 = np.load(os.path.join(current_dir, "Embeddings/LLMEmbeddings/Bert768field_embeddings.npz"))
 field_study_bert768, field_land_bert768 = bert768["array1"], bert768["array2"]
 
-minillm384 = np.load("LanguageExperiments/LanguageEmbeddings/MiniLLM384field_embeddings.npz")
+minillm384 = np.load(os.path.join(current_dir, "Embeddings/LLMEmbeddings/MiniLLM384field_embeddings.npz"))
 field_study_minillm384, field_land_minillm384 = minillm384["array1"], minillm384["array2"]
 
-albert768 = np.load("LanguageExperiments/LanguageEmbeddings/ALBERT768field_embeddings.npz")
+albert768 = np.load(os.path.join(current_dir, "Embeddings/LLMEmbeddings/ALBERT768field_embeddings.npz"))
 field_study_albert768, field_land_albert768 = albert768["array1"], albert768["array2"]
 
-roberta768 = np.load("LanguageExperiments/LanguageEmbeddings/Roberta784field_embeddings.npz")
-field_study_roberta768, field_land_roberta768 = roberta768["array1"], roberta768["array2"]
-
-t5_512 = np.load("LanguageExperiments/LanguageEmbeddings/t5_512field_embeddings.npz")
+t5_512 = np.load(os.path.join(current_dir, "Embeddings/LLMEmbeddings/t5_512field_embeddings.npz"))
 field_study_t5_512, field_land_t5_512 = t5_512["array1"], t5_512["array2"]
 
 # LOAD IMAGE MODEL EMBEDDINGS
-resnet18_512 = np.load("LanguageExperiments/image_encodings/resnet18_embeddings.pkl", allow_pickle=True)
+resnet18_512 = np.load(os.path.join(current_dir, "Embeddings/ImageEmbeddings/resnet18_embeddings.pkl"), allow_pickle=True)
 resnet18_512_cat, resnet18_512_dog = np.array(resnet18_512["cat"]), np.array(resnet18_512["dog"])
 
-mobilenet_960 = np.load("LanguageExperiments/image_encodings/mobilenet_v3_embeddings.pkl", allow_pickle=True)
+mobilenet_960 = np.load(os.path.join(current_dir, "Embeddings/ImageEmbeddings/mobilenet_v3_embeddings.pkl"), allow_pickle=True)
 mobilenet_960_cat, mobilenet_960_dog = np.array(mobilenet_960["cat"]), np.array(mobilenet_960["dog"])
 
-effecientnet_1280 = np.load("LanguageExperiments/image_encodings/efficientnet_b0_embeddings.pkl", allow_pickle=True)
+effecientnet_1280 = np.load(os.path.join(current_dir, "Embeddings/ImageEmbeddings/efficientnet_b0_embeddings.pkl"), allow_pickle=True)
 effecientnet_1280_cat, effecientnet_1280_dog = np.array(effecientnet_1280["cat"]), np.array(effecientnet_1280["dog"])
 
-resnet50_2048 = np.load("LanguageExperiments/image_encodings/resnet50_embeddings.pkl", allow_pickle=True)
+resnet50_2048 = np.load(os.path.join(current_dir, "Embeddings/ImageEmbeddings/resnet50_embeddings.pkl"), allow_pickle=True)
 resnet50_2048_cat, resnet50_2048_dog = np.array(resnet50_2048["cat"]), np.array(resnet50_2048["dog"])
 
 # LOAD GLOVE WORD EMBEDDINGS
@@ -63,10 +68,10 @@ glove_loocv_var_range = np.arange(10, 101, 10)
 
 # Corrupted Data Experiments - Default Vs Eps experiments
 # data size, default_d is None because this is handled by the embedding_experiment_suite (wrapper for experiment_suite)
-# default_eps and default_tau are None because eps is varied and tau will take on eps value 
-llm_corrupted_experiment = [["eps", np.arange(0.01, 0.46, 0.05), 400, None, None, None]]
-img_corrupted_experiment = [["eps", np.arange(0.01, 0.46, 0.05), 1000, None, None, None]]
-glove_corrupted_experiment = [["eps", np.arange(0.01, 0.46, 0.05), 100, None, None, None]]
+# default_eta and default_tau are None because eta is varied and tau will take on eta value 
+llm_corrupted_experiment = [["eta", np.arange(0.01, 0.46, 0.05), 400, None, None, None]]
+img_corrupted_experiment = [["eta", np.arange(0.01, 0.46, 0.05), 1000, None, None, None]]
+glove_corrupted_experiment = [["eta", np.arange(0.01, 0.46, 0.05), 100, None, None, None]]
 
 # Corrupted Data Experiments - Vs Data Size
 data_var_range_large = np.arange(100, 5000, 500)
@@ -89,28 +94,36 @@ main_estimators = {
     "coord_median": lambda data, tau: coordinate_wise_median(data),
     "coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau),
     "geometric_median": lambda data, tau: geometric_median(data),
-    "lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, lambda data: median_of_means(data, 10), tau),
+    "lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau, lambda data: median_of_means(data, 10)),
     "median_of_means": lambda data, tau: median_of_means(data, 10),
     "lrv": lambda data, tau: lrv(data, C=1, trace_est_option="robust"),
-    "ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau, gamma=5, t=10, stop_early2=False), # do not use halting by default
-    "que_low_n": lambda data, tau: que_mean(data, tau, t=10, fast=True, stop_early2=True), # use halting by default
-    "pgd": lambda data, eps: grad_descent(data, eps, nItr=15)
+    "ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau, gamma=5, t=10, early_halt=False), # do not use halting by default
+    "que_low_n": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=True), # use halting by default
+    "pgd": lambda data, eta: grad_descent(data, eta, nItr=15)
 
     # commented out estimators are utlized in ablations  (see if I can fix this)
 
     #"lrv_general": lambda data, tau: lrvGeneral(data, eta=tau),
 
-    #"ev_filtering_halt": lambda data, tau: eigenvalue_pruning_updated(data, tau, gamma=5, t=10, stop_early2=True),
-    #"ev_filtering_no_halt": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, stop_early2=False),
-    #"ev_filtering_low_n_random": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, stop_early2=True, pruning="random"),
-    #"ev_filtering_low_n_fixed": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, stop_early2=True, pruning="fixed"),
+    #"ev_filtering_halt": lambda data, tau: eigenvalue_pruning_updated(data, tau, gamma=5, t=10, early_halt=True),
+    #"ev_filtering_no_halt": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, early_halt=False),
+    #"ev_filtering_low_n_random": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, early_halt=True, pruning="random"),
+    #"ev_filtering_low_n_fixed": lambda data, tau: eigenvalue_pruning_updated(data, tau, 0.1, 5, t=10, early_halt=True, pruning="fixed"),
 
-    #"que_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, stop_early2=True),
-    #"que_no_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, stop_early2=False),
-    #"que_low_n_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, stop_early2=True),
-    #"que_original_halt": lambda data, tau: que_mean(data, tau, t=10, original_threshold=True, fast=True, stop_early2=True),
-    #"que_no_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, stop_early2=False),
+    #"que_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=True),
+    #"que_no_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=False),
+    #"que_low_n_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=True),
+    #"que_original_halt": lambda data, tau: que_mean(data, tau, t=10, original_threshold=True, fast=True, early_halt=True),
+    #"que_no_halt": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=False),
 
 }
 
-
+estimators_short = {
+    "sample_mean": lambda data, tau: sample_mean(data),
+    "coord_median": lambda data, tau: coordinate_wise_median(data),
+    "coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau),
+    "geometric_median": lambda data, tau: geometric_median(data),
+    "lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau, lambda data: median_of_means(data, 10)),
+    "median_of_means": lambda data, tau: median_of_means(data, 10),
+    "que_low_n": lambda data, tau: que_mean(data, tau, t=10, fast=True, early_halt=True), # use halting by default
+}

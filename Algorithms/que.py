@@ -1,9 +1,10 @@
 """
-This code is based on quantum entropy scoring from the following paper:
+Robust mean estimation using quantum entropy scoring from the following paper:
 
-Yihe Dong, Samuel Hopkins, and Jerry Li, 
-Quantum Entropy Scoring for Fast Robust Mean Estimation and Improved Outlier Detection
-Advances in Neural Information Processing Systems (NeurIPS), 2019.
+Yihe Dong, Samuel B. Hopkins, and Jerry Li. 
+Quantum entropy scoring for fast robust mean estimation and improved outlier detection. 
+In NeurIPS, 2019. 
+URL https://arxiv.org/abs/1906.11366.
 
 Code is taken, with some modifications from https://github.com/twistedcubic/que-outlier-detection
 

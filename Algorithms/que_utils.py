@@ -1,6 +1,7 @@
 """
 QUE Utilities function directly from https://github.com/twistedcubic/que-outlier-detection
 """
+
 from __future__ import unicode_literals
 import matplotlib
 matplotlib.use('agg')
@@ -292,7 +293,7 @@ def get_hadamard(d):
     if d in H2:
         return H2[d]
     if osp.exists('h{}.pt'.format(d)):
-        H2[d] = torch.load('h{}.pt'.format(d)).to(device)
+        H2[d] = torch.load('h{}.pt'.format(d), weights_only=False).to(device)
         return H2[d]
     power = math.log(d, 2)
     if power-round(power) != 0:

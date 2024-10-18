@@ -1,5 +1,5 @@
 """
-This code is based on the following paper:
+Robust mean estimation using semi definite programming based on the following paper:
 
 Aditya Deshmukh, Jing Liu, and Venugopal V. Veeravalli. 
 Robust mean estimation in high dimensions: An outlier fraction agnostic and efficient algorithm, 2022

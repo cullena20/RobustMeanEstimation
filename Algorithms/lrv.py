@@ -1,8 +1,9 @@
 """
-This code is based on the algorithm from the following paper:
+Robust mean estimation based on recursive subspace projection from the following paper:
 
-Lai, Kevin & Rao, Anup & Vempala, Santosh. (2016). 
-Agnostic Estimation of Mean and Covariance. 665-674. 10.1109/FOCS.2016.76. 
+Kevin A Lai, Anup B Rao, and Santosh Vempala. Agnostic estimation of mean and covariance. In 2016
+IEEE 57th Annual Symposium on Foundations of Computer Science (FOCS), pp. 665-674. IEEE, 2016.
+URL https://arxiv.org/abs/1604.06968
 
 Code is based on MatLab code from https://github.com/kevinalai/AgnosticMeanAndCovarianceCode
 """

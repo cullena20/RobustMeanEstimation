@@ -1,9 +1,9 @@
 """
-This code is based on projected gradient descent from the following paper:
+Robust mean estimation using projected gradient descent from the following paper:
 
-Yu Cheng, Ilias Diakonikolas, Rong Ge, and Mahdi Soltanolkotabi. 2020. 
-High-dimensional robust mean estimation via gradient descent. 
-In Proceedings of the 37th International Conference on Machine Learning (ICML'20), Vol. 119. JMLR.org, Article 165, 1768–1778.
+Yu Cheng, Ilias Diakonikolas, Rong Ge, and Mahdi Soltanolkotabi. 
+High-dimensional robust mean estimation via gradient descent, 2020. 
+URL https://arxiv.org/abs/2005.01378.
 
 Code is based on MatLab code from https://github.com/chycharlie/robust-bn-faster
 """

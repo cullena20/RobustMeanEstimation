@@ -1,17 +1,14 @@
 """
-This code is based on eigenvalue pruning from the following paper:
+Robust mean estimation using eigenvalue pruning from the following paper:
 
-Ilias Diakonikolas, Gautam Kamath, Daniel M. Kane, Jerry Li, Ankur Moitra, and Alistair Stewart. 2017. 
-Being robust (in high dimensions) can be practical. 
-In Proceedings of the 34th International Conference on Machine Learning - Volume 70 (ICML'17). JMLR.org, 999–1008.
+Ilias Diakonikolas, Gautam Kamath, Daniel M Kane, Jerry Li, Ankur Moitra, and Alistair Stewart. 
+Being robust (in high dimensions) can be practical.
+In International Conference on Machine Learning, pp.
+999-1008. PMLR, 2017
+URL https://arxiv.org/abs/1703.00893
 
 Code is based on MatLab code from https://github.com/hoonose/robust-filter
 """
-
-# REMOVED p
-# CHANGED NAME TO REMOVE _UPDATED
-# INCORPORATED THRESHOLD HERE
-# CHANGED cher name to gamma
 
 import numpy as np
 import math

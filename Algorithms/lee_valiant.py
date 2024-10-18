@@ -1,11 +1,10 @@
 """
-This code is based on the algorithm from the following paper:
+Mean estimation based on the following paper:
 
-Jasper C.H. Lee and Paul Valiant. 
-Optimal Sub-Gaussian Mean Estimation in Very High Dimensions. 
-In 13th Innovations in Theoretical Computer Science Conference (ITCS 2022). 
-Leibniz International Proceedings in Informatics (LIPIcs), Volume 215, pp. 98:1-98:21, 
-Schloss Dagstuhl - Leibniz-Zentrum für Informatik (2022)
+Jasper CH Lee and Paul Valiant.
+Optimal sub-gaussian mean estimation in very high dimensions. 
+In 13th Innovations in Theoretical Computer Science Conference (ITCS 2022), 2022.
+URL https://arxiv.org/abs/2011.08384
 """
 
 import numpy as np
