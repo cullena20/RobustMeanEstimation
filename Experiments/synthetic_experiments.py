@@ -1,9 +1,5 @@
 """
-Run experiments presented in paper
-
-Note:
-This file was never all just ran at once, and experiments were added and changed as needed
-As a result, some runs may encounter bugs
+Run synthetic experiments presented in paper
 """
 
 # import corruption schemes, experiments, and estimators 

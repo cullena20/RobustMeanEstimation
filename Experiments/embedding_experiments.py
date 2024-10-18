@@ -1,5 +1,5 @@
 """
-Replicate experiments over LLM embeddings, deep pretrained image model embeddings, and GloVe context free word embeddings.
+Run real world experiments over LLM embeddings, deep pretrained image model embeddings, and GloVe context free word embeddings.
 """
 
 
