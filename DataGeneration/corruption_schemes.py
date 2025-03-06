@@ -144,6 +144,37 @@ def uniform_noise_top_nonspherical(n, d, true_mean, diag_fun=None):
     Y1 = true_mean + Y1
     return Y1
 
+
+def uniform_mulitnomial_one_cluster(n, d, true_mean, std=1):
+    """
+    Additive Single Cluster Noise for Uniform Multinomial
+    """
+    # rotate cluster randomly to remove bias possibly induced by coordinate axises
+    rotate_basis = random_rotation_matrix(d)
+    noise_mean = true_mean + rotate_basis @ np.ones(d) * (1/np.sqrt(d))
+    #noise_mean = true_mean + rotate_basis @ np.ones(d) * std
+    cov = np.eye(d) / 10
+    Y1 = np.random.multivariate_normal(noise_mean, cov, round(n))
+    return Y1
+
+# def multivariate_t_one_cluster(n, d, true_mean, std=1):
+#     """
+#     Additive Single Cluster Noise for Multivariate T Distribution
+#     """
+#     # rotate cluster randomly to remove bias possibly induced by coordinate axises
+#     rotate_basis = random_rotation_matrix(d)
+#     noise_mean = true_mean + rotate_basis @ np.ones(d) * std
+#     cov = np.eye(d) / 10
+#     Y1 = np.random.multivariate_normal(noise_mean, cov, round(n))
+#     return Y1
+
+def mixture_of_gaussians_noise(n, d, true_mean):
+    noise_mean = np.ones(d) + 1
+    cov = np.eye(d)
+    Y1 = np.random.multivariate_normal(noise_mean, cov, round(n))
+    return Y1
+
+
 # Earlier noise generation schemes not used in experiments
 
 def obvious_hard_two_clusters(n, d, true_mean, angle=75, std=1, hard_weight=0.5):

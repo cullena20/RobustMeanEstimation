@@ -3,12 +3,36 @@ Run synthetic experiments presented in paper
 """
 
 # import corruption schemes, experiments, and estimators 
-from synthetic_setup import identity_corruption_schemes, spherical_corruption_schemes, spherical_vary_std_schemes, meta_nonsp_corruption_schemes, nonsp_vary_std_schemes, uncorrupted_data_scheme, mix_schemes, id_gaussian_corruption_one_cluster
+from synthetic_setup import identity_corruption_schemes, spherical_corruption_schemes, spherical_vary_std_schemes, meta_nonsp_corruption_schemes, nonsp_vary_std_schemes, uncorrupted_data_scheme, mix_schemes, id_gaussian_corruption_one_cluster, nongauss_corruption_schemes, heavy_tail_uncorr_scheme
 from synthetic_setup import experiments, std_experiments, tau_experiments, uncorrupted_experiments, ev_que_experiment
 from synthetic_setup import main_estimators, lee_valiant_comparison, median_of_means_options, lrv_options_C, lrv_options_general_gaus, ev_options, large_outlier_identity_corruption_schemes, grad_iterations, ev_que_original_vs_new, que_estimators, ev_pruning_comparison, eigenvalue_pruning_routines
 
 # use experiment_suite to run experiments
 from experiment_helper import experiment_suite
+
+from synthetic_setup import old_experiments_short, uncorrupted_experiments_short
+
+print("For Presentation")
+experiment_suite(main_estimators, identity_corruption_schemes["gaus_one"], experiments, runs=5, error_bars=True, plot_good_sample=True, plot=False, sample_scale_cov=False, save_title=f"sample_good_sample", pickle_results=True, style_dict="main")
+print()
+exit()
+
+print("Uncorrupted Identity Covariance")
+experiment_suite(main_estimators, heavy_tail_uncorr_scheme, uncorrupted_experiments, runs=3, plot_good_sample=False, error_bars=True, save_title="heavy_tail", style_dict="main")
+print()
+
+exit()
+
+print("Non Gaussian Synthetic Experiments") 
+for key, scheme in nongauss_corruption_schemes.items(): # 6 schemes
+    print(f"Corruption Scheme: {key}")
+    try:
+        experiment_suite(main_estimators, scheme, experiments, runs=3, error_bars=True, plot_good_sample=True, plot=False, sample_scale_cov=True, save_title=f"{key}", pickle_results=True, style_dict="main")
+    except Exception as e:
+        print(f"Failed Non-Gauss On Scheme {scheme}: {e}")
+    print()
+
+exit()
 
 # 4.1 - Uncorrupted Identity Covariance
 

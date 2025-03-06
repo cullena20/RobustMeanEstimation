@@ -4,6 +4,15 @@ Setup various utilities to perform experiments:
  - Define corrupted data schemes
  - Define estimators
 """
+import sys
+import os
+
+# Add the 'Algorithms' and "DataGeneration" directories to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+algorithms_dir = os.path.abspath(os.path.join(current_dir, '../Algorithms'))
+data_dir = os.path.abspath(os.path.join(current_dir, '../DataGeneration'))
+sys.path.append(algorithms_dir)
+sys.path.append(data_dir)
 
 # Ensure that Algorithms and DataGeneration are in the path
 
@@ -16,9 +25,9 @@ from pgd import grad_descent
 from sdp import sdp_mean
 
 from data_generation import generate_data_helper
-from inlier_data import gaussian_data
+from inlier_data import gaussian_data, t_data, gaussian_mixture_data, uniform_multinomial_data, laplace_data, poisson_data
 from corruption_schemes import dkk_noise, gaussian_noise_one_cluster, gaussian_noise_two_clusters, uniform_noise_top, uniform_noise_whole, obvious_noise, subtractive_noise, obvious_easy, obvious_hard_two_clusters, multiple_corruption
-from corruption_schemes import gaussian_noise_one_cluster_nonspherical, obvious_noise_nonspherical, subtractive_noise_nonspherical, uniform_noise_top_nonspherical
+from corruption_schemes import gaussian_noise_one_cluster_nonspherical, obvious_noise_nonspherical, subtractive_noise_nonspherical, uniform_noise_top_nonspherical, uniform_mulitnomial_one_cluster, mixture_of_gaussians_noise
 
 
 import numpy as np
@@ -86,6 +95,12 @@ old_experiments_short = [["n", np.arange(20, 3021, 500), None, 150, 0.1, None],
                ["d", np.arange(20, 321, 50), 150, None, 0.1, None],
                ["eta", np.arange(0.01, 0.32, 0.1), 150, 150, None, None]]
 
+# experiment over uncorrupted data
+uncorrupted_experiments_short = [["n", np.arange(20, 3021, 500), None, 150, 0.1, None],
+               ["n", np.arange(20, 321, 80), None, 150, 0.1, None],
+               ["d", np.arange(20, 321, 50), 150, None, 0.1, None],
+                            ["tau", np.arange(0, 0.46, 0.1), 150, 150, 0, None]]
+
 # very large dimensionality
 huge_experiments = [["d", np.arange(20, 10021, 500), default_n, None, default_eta, default_tau],
                     ["eta", np.arange(0.01, 0.42, 0.05), 10000, 10000, None, default_tau]]
@@ -99,7 +114,10 @@ alt_experiments = [["n", np.arange(20, 10021, 500), None, default_d, default_eta
 # DATA SCHEMES
 
 # IDENTITY COVARIANCE NO CORRUPTION
-uncorrupted_data_scheme = lambda n, d, eta: gaussian_data(n, d, eta, mean_fun=mean_fun)
+uncorrupted_data_scheme = lambda n, d, eta: gaussian_data(n, d, mean_fun=mean_fun)
+
+# HEAVY TAILED unCCORUTPED
+heavy_tail_uncorr_scheme = lambda n, d, eta: t_data(n, d, mean_fun=mean_fun)
 
 # IDENTITY COVARIANCE CORRUPTION
 # cov_fun is identity by default in generate_data_helper
@@ -135,6 +153,29 @@ id_obvious_easy_corruption = lambda n, d, eta: generate_data_helper(n, d, eta, u
 id_obvious_gaus_one_corruption = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, gaussian_noise_one_cluster), mean_fun=mean_fun)
 id_obvious_dkk_corruption = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=gaussian_data, corruption_fun= lambda n, d, true_mean: multiple_corruption(n, d, true_mean, obvious_noise, dkk_noise), mean_fun=mean_fun)
 
+# Multinomial T Distribution - One Cluster Noise
+nongauss_multinomial_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=t_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+
+# Multinomial T Distribution - Uniform Top Noise
+nongauss_multinomial_uniform_top = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=t_data, corruption_fun=uniform_noise_top, mean_fun=mean_fun)
+
+# Mixture Of Gaussians - Additional Gaussian
+nongauss_mixture_corruption = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=gaussian_mixture_data, corruption_fun=mixture_of_gaussians_noise, mean_fun=None)
+
+# Uniform Multinomial Data
+nongauss_multinomial_far_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=uniform_multinomial_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+nongauss_multinomial_close_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=uniform_multinomial_data, corruption_fun=uniform_mulitnomial_one_cluster, mean_fun=mean_fun)
+
+# Laplace Data
+nongauss_laplace_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=laplace_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+
+# Poisson Data
+nongauss_poisson_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=poisson_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+
+# multinomial
+nongauss_poisson_cluster = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=poisson_data, corruption_fun=gaussian_noise_one_cluster, mean_fun=mean_fun)
+
+
 identity_corruption_schemes = {  "dkk": id_dkk_corruption,
                         "gaus_one": id_gaussian_corruption_one_cluster,
                         "gaus_two": id_gaussian_corruption_two_clusters,
@@ -156,6 +197,18 @@ dkk_random = lambda n, d, eta: generate_data_helper(n, d, eta, uncorrupted_fun=g
 identity_true_mean_dependence_schemes = {
     "gaus_one_random": gaus_one_random,
     "dkk_random": dkk_random
+}
+
+# NON GAUSSIAN DATA
+
+nongauss_corruption_schemes = {
+    #"t_far": nongauss_multinomial_cluster,
+    #"mix_gaussian": nongauss_mixture_corruption,
+    #"uniform_multi_far": nongauss_multinomial_far_cluster,
+    #"uniform_multi_close": nongauss_multinomial_close_cluster,
+    "t_top": nongauss_multinomial_uniform_top,
+    #"laplace": nongauss_laplace_cluster,
+    #"poisson": nongauss_poisson_cluster,
 }
 
 # UNKNOWN SPHERICAL COVARIANCE
@@ -256,17 +309,17 @@ mix_schemes = {
 
 # main_estimators are used across experiments, the others are used for hyperparameter and other comparisons
 main_estimators = {
-    "sample_mean": lambda data, tau: sample_mean(data),
-    "coord_median": lambda data, tau: coordinate_wise_median(data),
-    "coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau=tau),
-    "geometric_median": lambda data, tau: geometric_median(data),
-    "lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau=tau, mean_estimator=lambda data: median_of_means(data, 10)),
-    "median_of_means": lambda data, tau: median_of_means(data, 10),
-    "lrv": lambda data, tau: lrv(data, C=1, trace_est_option="robust"),
-    "ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau=tau, gamma=5, t=10),
-    "que_low_n": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=False),
+    "sample_mean Error": lambda data, tau: sample_mean(data),
+    #"coord_median": lambda data, tau: coordinate_wise_median(data),
+    #"coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau=tau),
+    #"geometric_median": lambda data, tau: geometric_median(data),
+    #"lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau=tau, mean_estimator=lambda data: median_of_means(data, 10)),
+    #"median_of_means": lambda data, tau: median_of_means(data, 10),
+    #"lrv": lambda data, tau: lrv(data, C=1, trace_est_option="robust"),
+    #"ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau=tau, gamma=5, t=10),
+    #"que_low_n": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True),
     # "que_halt": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True), used for robustness to expected corruption
-    "pgd": lambda data, tau: grad_descent(data, tau=tau, nItr=15)
+    #"pgd": lambda data, tau: grad_descent(data, tau=tau, nItr=15)
 }
 
 
