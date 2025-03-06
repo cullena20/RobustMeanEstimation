@@ -202,13 +202,13 @@ identity_true_mean_dependence_schemes = {
 # NON GAUSSIAN DATA
 
 nongauss_corruption_schemes = {
-    #"t_far": nongauss_multinomial_cluster,
-    #"mix_gaussian": nongauss_mixture_corruption,
+    "t_far": nongauss_multinomial_cluster,
+    "mix_gaussian": nongauss_mixture_corruption,
     #"uniform_multi_far": nongauss_multinomial_far_cluster,
     #"uniform_multi_close": nongauss_multinomial_close_cluster,
-    "t_top": nongauss_multinomial_uniform_top,
-    #"laplace": nongauss_laplace_cluster,
-    #"poisson": nongauss_poisson_cluster,
+    #"t_top": nongauss_multinomial_uniform_top,
+    "laplace": nongauss_laplace_cluster,
+    "poisson": nongauss_poisson_cluster,
 }
 
 # UNKNOWN SPHERICAL COVARIANCE
@@ -309,17 +309,17 @@ mix_schemes = {
 
 # main_estimators are used across experiments, the others are used for hyperparameter and other comparisons
 main_estimators = {
-    "sample_mean Error": lambda data, tau: sample_mean(data),
-    #"coord_median": lambda data, tau: coordinate_wise_median(data),
-    #"coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau=tau),
-    #"geometric_median": lambda data, tau: geometric_median(data),
-    #"lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau=tau, mean_estimator=lambda data: median_of_means(data, 10)),
-    #"median_of_means": lambda data, tau: median_of_means(data, 10),
-    #"lrv": lambda data, tau: lrv(data, C=1, trace_est_option="robust"),
-    #"ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau=tau, gamma=5, t=10),
-    #"que_low_n": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True),
-    # "que_halt": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True), used for robustness to expected corruption
-    #"pgd": lambda data, tau: grad_descent(data, tau=tau, nItr=15)
+    "sample_mean": lambda data, tau: sample_mean(data),
+    "coord_median": lambda data, tau: coordinate_wise_median(data),
+    "coord_trimmed_mean": lambda data, tau: coord_trimmed_mean(data, tau=tau),
+    "geometric_median": lambda data, tau: geometric_median(data),
+    "lee_valiant_simple": lambda data, tau: lee_valiant_simple(data, tau=tau, mean_estimator=lambda data: median_of_means(data, 10)),
+    "median_of_means": lambda data, tau: median_of_means(data, 10),
+    "lrv": lambda data, tau: lrv(data, C=1, trace_est_option="robust"),
+    "ev_filtering_low_n": lambda data, tau: eigenvalue_pruning(data, tau=tau, gamma=5, t=10),
+    "que_low_n": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True),
+    "que_halt": lambda data, tau: que_mean(data, tau=tau, fast=True, early_halt=True), # used for robustness to expected corruption
+    "pgd": lambda data, tau: grad_descent(data, tau=tau, nItr=15)
 }
 
 

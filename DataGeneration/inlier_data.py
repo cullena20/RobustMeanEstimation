@@ -179,61 +179,6 @@ def laplace_data(n, d, mean_fun=None, cov_fun=None):
     
     return data, good_sample_mean, true_mean
 
-
-# def gaussian_mixture_data(n, d, mean_fun=None, cov_fun=None, weights=None):
-#     """
-#     Generate data from a mixture of 3 Gaussian distributions in d dimensions.
-#     The function will generate n samples where each sample is drawn from one of the three Gaussian distributions.
-    
-#     n: Number of samples
-#     d: Number of dimensions
-#     mean_fun: Function to generate mean of each Gaussian (returns a list of size 3 with means for each Gaussian)
-#     cov_fun: Function to generate covariance matrices for each Gaussian (returns a list of size 3 with covariance matrices for each Gaussian)
-#     weights: A list of mixing weights (3 values summing to 1, representing how likely each Gaussian is to be chosen)
-#     """
-    
-#     if mean_fun is None:
-#         # Default means for each Gaussian (e.g., centered at different points)
-#         means = [np.zeros(d), np.ones(d), -np.ones(d)]
-#     else:
-#         means = mean_fun(d)
-    
-#     if cov_fun is None:
-#         # Default covariances (identity matrices)
-#         covariances = [np.eye(d), np.eye(d), np.eye(d)]
-#     else:
-#         covariances = cov_fun(d)
-    
-#     if weights is None:
-#         # Default mixing weights (uniform distribution)
-#         weights = [1/3, 1/3, 1/3]
-    
-#     # Normalize weights to ensure they sum to 1
-#     weights = np.array(weights)
-#     weights /= weights.sum()
-    
-#     # Generate the data points
-#     data = []
-#     for i in range(n):
-#         # Choose the Gaussian component based on the weights
-#         component = np.random.choice([0, 1, 2], p=weights)
-        
-#         # Sample a point from the chosen Gaussian
-#         sample = np.random.multivariate_normal(means[component], covariances[component])
-#         data.append(sample)
-    
-#     data = np.array(data)
-    
-#     # Calculate the good sample mean (mean of the generated data)
-#     good_sample_mean = np.mean(data, axis=0)
-    
-#     # The true mean is the weighted sum of the means
-#     true_mean = np.dot(weights, means)
-    
-#     return data, good_sample_mean, true_mean
-
-import numpy as np
-
 def poisson_data(n, d, mean_fun=None, cov_fun=None):
     """
     Generate data from a multivariate Poisson distribution in d dimensions.

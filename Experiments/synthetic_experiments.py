@@ -12,28 +12,6 @@ from experiment_helper import experiment_suite
 
 from synthetic_setup import old_experiments_short, uncorrupted_experiments_short
 
-print("For Presentation")
-experiment_suite(main_estimators, identity_corruption_schemes["gaus_one"], experiments, runs=5, error_bars=True, plot_good_sample=True, plot=False, sample_scale_cov=False, save_title=f"sample_good_sample", pickle_results=True, style_dict="main")
-print()
-exit()
-
-print("Uncorrupted Identity Covariance")
-experiment_suite(main_estimators, heavy_tail_uncorr_scheme, uncorrupted_experiments, runs=3, plot_good_sample=False, error_bars=True, save_title="heavy_tail", style_dict="main")
-print()
-
-exit()
-
-print("Non Gaussian Synthetic Experiments") 
-for key, scheme in nongauss_corruption_schemes.items(): # 6 schemes
-    print(f"Corruption Scheme: {key}")
-    try:
-        experiment_suite(main_estimators, scheme, experiments, runs=3, error_bars=True, plot_good_sample=True, plot=False, sample_scale_cov=True, save_title=f"{key}", pickle_results=True, style_dict="main")
-    except Exception as e:
-        print(f"Failed Non-Gauss On Scheme {scheme}: {e}")
-    print()
-
-exit()
-
 # 4.1 - Uncorrupted Identity Covariance
 
 print("Uncorrupted Identity Covariance")
@@ -119,7 +97,18 @@ for key, scheme in mix_schemes.items():
         print(f"Failed Rotated On Scheme {scheme}: {e}")
     print()
     
-# 6 - Lee Valiant Comparison (Eigenvalue Pruning In Seperate File)
+# 6 - Non Gaussian Synthetic Experiments
+
+print("Non Gaussian Synthetic Experiments") 
+for key, scheme in nongauss_corruption_schemes.items(): # 6 schemes
+    print(f"Corruption Scheme: {key}")
+    try:
+        experiment_suite(main_estimators, scheme, experiments, runs=3, error_bars=True, plot_good_sample=True, plot=False, sample_scale_cov=True, save_title=f"{key}", pickle_results=True, style_dict="main")
+    except Exception as e:
+        print(f"Failed Non-Gauss On Scheme {scheme}: {e}")
+    print()
+
+# 7 - Lee Valiant Comparison (Eigenvalue Pruning In Seperate File)
 
 print("Lee Valiant Comparison")
 try:
@@ -128,7 +117,7 @@ except Exception as e:
     print(f"Failed Lee Valiant Comparison with exception: {e}")
 print()
 
-# 6 - Original vs Updated EV + QUE
+# 7 - Original vs Updated EV + QUE
 print("Original Vs Updated EV + QUE Experiment")
 experiment_suite(ev_que_original_vs_new, identity_corruption_schemes["dkk"], ev_que_experiment, runs=5, plot_good_sample=False, error_bars=True, save_title="ev_que_comparison", pickle_results=True, style_dict="main")
 
