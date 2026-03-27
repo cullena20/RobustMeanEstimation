@@ -1,7 +1,8 @@
 # Robust Mean Estimation Suite
 
-This code accompanies the paper "Robust High-Dimensional Mean Estimation With Low Data Size". 
-It includes a suite of robust mean estimation algorithms and experimental infrastructure to run your own experiments over your own settings, algorithms, and data. We also provide files to recreate the experiments in the paper.
+Codebase for ["Robust High-Dimensional Mean Estimation With Low Data Size"](https://arxiv.org/abs/2502.11324), published in TMLR 2025.
+
+This codebase includes a suite of robust mean estimation algorithms and experimental infrastructure to run your own experiments over your own settings, algorithms, and data. We also provide files to recreate the experiments in the paper.
 
 Here we cover some main usage points of this library. See basic_usage.py for a code tutorial to 1) Use mean estimators and data generating functions 2) recreate synthetic data experiments similar to those seen in the paper and define your own experiments 3) perform experiments over your own data and recreate embedding experiments seen in the paper.
 
@@ -111,3 +112,20 @@ synthetic_setup.py and synthetic_experiments.py setup and run the synthetic expe
 ## Embeddings
 
 We additionally provide the embeddings that we utilized for experiments on large language model, deep pretrained image model, and context free word embeddings under Embeddings. 
+
+## Citation
+
+If you use this code or build on our findings, please cite our paper:
+
+```bibtex
+@article{
+anderson2025robust,
+title={Robust High-Dimensional Mean Estimation With Low Data Size, an Empirical Study},
+author={Cullen Anderson and Jeff M. Phillips},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2025},
+url={https://openreview.net/forum?id=1QeI99nH9k},
+note={}
+}
+```
